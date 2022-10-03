@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 
+import { TranscriptConsequence as TranscriptConsequenceType } from '../types'
 import { ExternalLink, ListItem, Modal, OrderedList, TextButton } from '@gnomad/ui'
 
 import Link from '../Link'
 import { getLabelForConsequenceTerm } from '../vepConsequences'
 import TranscriptConsequence from './TranscriptConsequence'
-import TranscriptConsequencePropType from './TranscriptConsequencePropType'
 
 /**
  * Group a list of consequences by a field's value. Maintains sort order of list.
@@ -35,7 +35,7 @@ const TranscriptInfoWrapper = styled.div`
 `
 
 type TranscriptInfoProps = {
-  transcriptConsequence: TranscriptConsequencePropType
+  transcriptConsequence: TranscriptConsequenceType
 }
 
 const TranscriptInfo = ({ transcriptConsequence }: TranscriptInfoProps) => {
@@ -72,7 +72,7 @@ const TranscriptInfo = ({ transcriptConsequence }: TranscriptInfoProps) => {
 }
 
 type ConsequencesInGeneProps = {
-  transcriptConsequences: TranscriptConsequencePropType[]
+  transcriptConsequences: TranscriptConsequenceType[]
 }
 
 type ConsequencesInGeneState = any
@@ -163,7 +163,7 @@ const ConsequenceListItem = styled.li`
 `
 
 type TranscriptConsequenceListProps = {
-  transcriptConsequences: TranscriptConsequencePropType[]
+  transcriptConsequences: TranscriptConsequenceType[]
 }
 
 export const TranscriptConsequenceList = ({

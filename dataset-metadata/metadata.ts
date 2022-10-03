@@ -20,12 +20,68 @@ export const datasetLabels = {
 export type DatasetId = keyof typeof datasetLabels
 
 export const allDatasetIds = Object.getOwnPropertyNames(datasetLabels) as DatasetId[]
+export const v2DatasetIds = allDatasetIds.filter((datasetId) => datasetId.startsWith('gnomad_r2'))
+export const v3DatasetIds = allDatasetIds.filter((datasetId) => datasetId.startsWith('gnomad_r3'))
 
 // Regex below matches, e.g., gnomad_r1_2_3_4, but not gnomad_r1_2_3_4_foo
 
 const fullDatasetIds = allDatasetIds.filter(
   (datasetId) => datasetId === 'exac' || datasetId.match(/_r\d+(_\d+)*$/)
 )
+
+export const v3SiteQualityMetricNames = [
+  'SiteQuality',
+  'InbreedingCoeff',
+  'AS_FS',
+  'AS_MQ',
+  'AS_MQRankSum',
+  'AS_pab_max',
+  'AS_QUALapprox',
+  'AS_QD',
+  'AS_ReadPosRankSum',
+  'AS_SOR',
+  'AS_VarDP',
+  'AS_VQSLOD',
+] as const
+export type v3SiteQualityMetricName = typeof v3SiteQualityMetricNames[number]
+
+export const v2SiteQualityMetricNames = [
+  'BaseQRankSum',
+  'ClippingRankSum',
+  'DP',
+  'FS',
+  'InbreedingCoeff',
+  'MQ',
+  'MQRankSum',
+  'pab_max',
+  'QD',
+  'ReadPosRankSum',
+  'RF',
+  'SiteQuality',
+  'SOR',
+  'VQSLOD',
+] as const
+export type v2SiteQualityMetricName = typeof v2SiteQualityMetricNames[number]
+
+export const exacSiteQualityMetricNames = [
+  'BaseQRankSum',
+  'ClippingRankSum',
+  'DP',
+  'FS',
+  'InbreedingCoeff',
+  'MQ',
+  'MQRankSum',
+  'QD',
+  'ReadPosRankSum',
+  'SiteQuality',
+  'VQSLOD',
+] as const
+export type exacSiteQualityMetricName = typeof exacSiteQualityMetricNames[number]
+
+export type SiteQualityMetricName =
+  | v2SiteQualityMetricName
+  | v3SiteQualityMetricName
+  | exacSiteQualityMetricName
 
 export type DatasetMetadata = {
   label: string

@@ -3,6 +3,8 @@ import styled from 'styled-components'
 
 import { Badge, List, ListItem } from '@gnomad/ui'
 
+import { Variant } from '../types'
+
 const PREDICTORS = {
   cadd: { label: 'CADD', warningThreshold: 10, dangerThreshold: 20 },
   revel: { label: 'REVEL', warningThreshold: 0.5, dangerThreshold: 0.75 },
@@ -36,16 +38,15 @@ const Marker = styled.span`
 `
 
 type Props = {
-  variant: {
-    in_silico_predictors: {
-      id: string
-      value: string
-      flags: string[]
-    }[]
-  }
+  variant: Variant
 }
 
 const VariantInSilicoPredictors = ({ variant }: Props) => {
+  const { in_silico_predictors: inSilicoPredictors } = variant
+  if (!inSilicoPredictors) {
+    return null
+  }
+
   return (
     <div>
       <p>
@@ -54,7 +55,7 @@ const VariantInSilicoPredictors = ({ variant }: Props) => {
       </p>
       {/* @ts-expect-error TS(2745) FIXME: This JSX tag's 'children' prop expects type 'never... Remove this comment to see the full error message */}
       <List>
-        {variant.in_silico_predictors.map(({ id, value, flags }) => {
+        {inSilicoPredictors.map(({ id, value, flags }) => {
           // @ts-expect-error TS(7053) FIXME: Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
           const predictor = PREDICTORS[id]
 

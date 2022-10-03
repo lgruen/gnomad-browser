@@ -7,10 +7,13 @@ export const exomeReadApiOutputFactory = Factory.define(({ sequence }) => ({
   readGroup: `dummy_readgroup_${sequence}`,
 }))
 
-export const readsApiOutputFactory = Factory.define(({ sequence }) => ({
-  variant_0: {
-    variantId: `123-${45 + sequence}-A-C`,
-    exome: [],
-    genome: [],
-  },
-}))
+export const readsApiOutputFactory = Factory.define(({ params, sequence }) => {
+  const { variantId } = params as any
+  return {
+    variant_0: {
+      variantId: variantId || `123-${45 + sequence}-A-C`,
+      exome: [],
+      genome: [],
+    },
+  }
+})

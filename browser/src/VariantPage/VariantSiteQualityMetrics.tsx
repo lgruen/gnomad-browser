@@ -1,3 +1,11 @@
+import { DatasetId, SiteQualityMetricName, Variant } from '../types'
+
+import {
+  v2SiteQualityMetricNames,
+  v3SiteQualityMetricNames,
+  exacSiteQualityMetricNames,
+} from '@gnomad/dataset-metadata/metadata'
+
 import { max } from 'd3-array'
 import { scaleBand, scaleLinear } from 'd3-scale'
 import React, { useState } from 'react'
@@ -334,7 +342,8 @@ const prepareDataExac = ({ metric, variant }: any) => {
 
   const exomeBinValues = [0, ...histogram.bin_freq, 0]
 
-  return { binEdges, exomeBinValues, exomeMetricValue, description }
+  const result = { binEdges, exomeBinValues, exomeMetricValue, description }
+  return result
 }
 
 const prepareData = ({ datasetId, metric, variant }: any) => {
@@ -353,57 +362,17 @@ const prepareData = ({ datasetId, metric, variant }: any) => {
   throw new Error(`No metric values for dataset "${datasetId}"`)
 }
 
-const getAvailableMetrics = (datasetId: any) => {
+const getAvailableMetrics = (datasetId: DatasetId): readonly SiteQualityMetricName[] => {
   if (datasetId.startsWith('gnomad_r3')) {
-    return [
-      'SiteQuality',
-      'InbreedingCoeff',
-      'AS_FS',
-      'AS_MQ',
-      'AS_MQRankSum',
-      'AS_pab_max',
-      'AS_QUALapprox',
-      'AS_QD',
-      'AS_ReadPosRankSum',
-      'AS_SOR',
-      'AS_VarDP',
-      'AS_VQSLOD',
-    ]
+    return v3SiteQualityMetricNames
   }
 
   if (datasetId.startsWith('gnomad_r2')) {
-    return [
-      'BaseQRankSum',
-      'ClippingRankSum',
-      'DP',
-      'FS',
-      'InbreedingCoeff',
-      'MQ',
-      'MQRankSum',
-      'pab_max',
-      'QD',
-      'ReadPosRankSum',
-      'RF',
-      'SiteQuality',
-      'SOR',
-      'VQSLOD',
-    ]
+    return v2SiteQualityMetricNames
   }
 
   if (datasetId === 'exac') {
-    return [
-      'BaseQRankSum',
-      'ClippingRankSum',
-      'DP',
-      'FS',
-      'InbreedingCoeff',
-      'MQ',
-      'MQRankSum',
-      'QD',
-      'ReadPosRankSum',
-      'SiteQuality',
-      'VQSLOD',
-    ]
+    return exacSiteQualityMetricNames
   }
 
   throw new Error(`No known metrics for dataset "${datasetId}"`)
@@ -435,7 +404,7 @@ const yTickFormat = (n: any) => {
   return `${n}`
 }
 
-const formatMetricValue = (value: any, metric: any) => {
+const formatMetricValue = (value: number, metric: string) => {
   if (
     metric === 'SiteQuality' ||
     metric === 'AS_QUALapprox' ||
@@ -806,70 +775,9 @@ const AutosizedSiteQualityMetricsHistogram = withSize()(({ size, ...props }) => 
   </GraphWrapper>
 ))
 
-type VariantSiteQualityMetricsDistributionProps = {
-  datasetId: string
-  variant: {
-    exome?: {
-      quality_metrics: {
-        site_quality_metrics: {
-          metric: string
-          value?: number
-        }[]
-      }
-    }
-    genome?: {
-      quality_metrics: {
-        site_quality_metrics: {
-          metric: string
-          value?: number
-        }[]
-      }
-    }
-  }
-}
-
-type VariantSiteQualityMetricsTableProps = {
-  datasetId: string
-  variant: {
-    exome?: {
-      quality_metrics: {
-        site_quality_metrics: {
-          metric: string
-          value?: number
-        }[]
-      }
-    }
-    genome?: {
-      quality_metrics: {
-        site_quality_metrics: {
-          metric: string
-          value?: number
-        }[]
-      }
-    }
-  }
-}
-
 type VariantSiteQualityMetricsProps = {
-  datasetId: string
-  variant: {
-    exome?: {
-      quality_metrics: {
-        site_quality_metrics: {
-          metric: string
-          value?: number
-        }[]
-      }
-    }
-    genome?: {
-      quality_metrics: {
-        site_quality_metrics: {
-          metric: string
-          value?: number
-        }[]
-      }
-    }
-  }
+  datasetId: DatasetId
+  variant: Variant
 }
 
 const LegendWrapper = styled.div`
@@ -893,7 +801,7 @@ const getDefaultSelectedSequencingType = (variant: any) => {
 const VariantSiteQualityMetricsDistribution = ({
   datasetId,
   variant,
-}: VariantSiteQualityMetricsDistributionProps) => {
+}: VariantSiteQualityMetricsProps) => {
   const [selectedMetric, setSelectedMetric] = useState('SiteQuality')
   const [selectedSequencingType, setSelectedSequencingType] = useState(
     getDefaultSelectedSequencingType(variant)
@@ -1051,22 +959,19 @@ const renderMetric = (metric: any, datasetId: any) => {
   return metric
 }
 
-const VariantSiteQualityMetricsTable = ({
-  datasetId,
-  variant,
-}: VariantSiteQualityMetricsTableProps) => {
+const VariantSiteQualityMetricsTable = ({ datasetId, variant }: VariantSiteQualityMetricsProps) => {
   const isVariantInExomes = Boolean(variant.exome)
   const isVariantInGenomes = Boolean(variant.genome)
 
   const exomeMetricValues = variant.exome
     ? variant.exome.quality_metrics.site_quality_metrics.reduce(
-        (acc, m) => ({
+        (acc, metric) => ({
           ...acc,
-          [m.metric]: m.value,
+          [metric.metric]: metric.value,
         }),
-        {}
+        {} as { [index: string]: number | null }
       )
-    : null
+    : {}
   const genomeMetricValues = variant.genome
     ? variant.genome.quality_metrics.site_quality_metrics.reduce(
         (acc, m) => ({
@@ -1095,10 +1000,8 @@ const VariantSiteQualityMetricsTable = ({
             <th scope="row">{renderMetric(metric, datasetId)}</th>
             {isVariantInExomes && (
               <td>
-                {/* @ts-expect-error TS(2531) FIXME: Object is possibly 'null'. */}
-                {exomeMetricValues[metric] != null
-                  ? // @ts-expect-error TS(2531) FIXME: Object is possibly 'null'.
-                    formatMetricValue(exomeMetricValues[metric], metric)
+                {exomeMetricValues[metric]
+                  ? formatMetricValue(exomeMetricValues[metric]!, metric)
                   : '–'}
               </td>
             )}

@@ -4,6 +4,9 @@ import styled from 'styled-components'
 import { Badge, Button, ExternalLink, Page } from '@gnomad/ui'
 
 import { DatasetId, labelForDataset, referenceGenome } from '@gnomad/dataset-metadata/metadata'
+
+import { Variant } from '../types'
+
 import Delayed from '../Delayed'
 import DocumentTitle from '../DocumentTitle'
 import GnomadPageHeading from '../GnomadPageHeading'
@@ -49,17 +52,14 @@ const FlexWrapper = styled.div`
 
 type VariantPageContentProps = {
   datasetId: DatasetId
-  variant: {
-    variant_id: string
-    chrom: string
-    flags: string[]
-    clinvar?: any
-    exome?: any
-    genome?: any
-    lof_curations?: any[]
-    in_silico_predictors?: any[]
-    transcript_consequences?: any[]
+  variant: Variant
+}
+
+const genomeLocalAncestryPopulations = (variant: Variant) => {
+  if (!variant.genome) {
+    return []
   }
+  return variant.genome.local_ancestry_populations || []
 }
 
 const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => {
@@ -68,7 +68,6 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
       <ResponsiveSection>
         <TableWrapper>
           {datasetId === 'exac' ? (
-            // @ts-expect-error TS(2741) FIXME: Property 'coverage' is missing in type '{ variant_... Remove this comment to see the full error message
             <ExacVariantOccurrenceTable variant={variant} />
           ) : (
             <GnomadVariantOccurrenceTable
@@ -93,7 +92,6 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
       </ResponsiveSection>
       <ResponsiveSection>
         <h2>External Resources</h2>
-        {/* @ts-expect-error TS(2739) FIXME: Type '{ variant_id: string; chrom: string; flags: ... Remove this comment to see the full error message */}
         <ReferenceList variant={variant} />
         <h2>Feedback</h2>
         {/* @ts-expect-error TS(2786) FIXME: 'ExternalLink' cannot be used as a JSX component. */}
@@ -106,28 +104,27 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
         <h2>
           Population Frequencies <InfoButton topic="ancestry" />
         </h2>
-        {datasetId.startsWith('gnomad_r3') &&
-          (variant.genome.local_ancestry_populations || []).length > 0 && (
-            <div
-              style={{
-                padding: '0 1em',
-                border: '2px solid #1173bb',
-                background: '#1173bb0f',
-                borderRadius: '0.5em',
-                marginBottom: '1em',
-              }}
-            >
-              <p>
-                <Badge level="info">NEW</Badge> Local ancestry is now available for gnomAD v3.
-                Select the &ldquo;Local Ancestry&rdquo; tab below to view data. See our blog post on{' '}
-                {/* @ts-expect-error TS(2786) FIXME: 'ExternalLink' cannot be used as a JSX component. */}
-                <ExternalLink href="https://gnomad.broadinstitute.org/news/2021-12-local-ancestry-inference-for-latino-admixed-american-samples-in-gnomad/">
-                  local ancestry inference for Latino/Admixed American samples in gnomAD
-                </ExternalLink>{' '}
-                for more information.
-              </p>
-            </div>
-          )}
+        {datasetId.startsWith('gnomad_r3') && genomeLocalAncestryPopulations(variant).length > 0 && (
+          <div
+            style={{
+              padding: '0 1em',
+              border: '2px solid #1173bb',
+              background: '#1173bb0f',
+              borderRadius: '0.5em',
+              marginBottom: '1em',
+            }}
+          >
+            <p>
+              <Badge level="info">NEW</Badge> Local ancestry is now available for gnomAD v3. Select
+              the &ldquo;Local Ancestry&rdquo; tab below to view data. See our blog post on{' '}
+              {/* @ts-expect-error TS(2786) FIXME: 'ExternalLink' cannot be used as a JSX component. */}
+              <ExternalLink href="https://gnomad.broadinstitute.org/news/2021-12-local-ancestry-inference-for-latino-admixed-american-samples-in-gnomad/">
+                local ancestry inference for Latino/Admixed American samples in gnomAD
+              </ExternalLink>{' '}
+              for more information.
+            </p>
+          </div>
+        )}
         <VariantPopulationFrequencies datasetId={datasetId} variant={variant} />
       </Section>
 
@@ -138,7 +135,6 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
 
       <Section>
         <h2>Variant Effect Predictor</h2>
-        {/* @ts-expect-error TS(2741) FIXME: Property 'reference_genome' is missing in type '{ ... Remove this comment to see the full error message */}
         <VariantTranscriptConsequences variant={variant} />
       </Section>
 
@@ -147,7 +143,6 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
           <h2>
             LoF Curation <InfoButton topic="lof-curation" />
           </h2>
-          {/* @ts-expect-error TS(2322) FIXME: Type '{ variant_id: string; chrom: string; flags: ... Remove this comment to see the full error message */}
           <VariantLoFCurationResults variant={variant} />
         </Section>
       )}
@@ -155,7 +150,6 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
       {variant.in_silico_predictors && variant.in_silico_predictors.length && (
         <Section>
           <h2>In Silico Predictors</h2>
-          {/* @ts-expect-error TS(2322) FIXME: Type '{ variant_id: string; chrom: string; flags: ... Remove this comment to see the full error message */}
           <VariantInSilicoPredictors variant={variant} />
         </Section>
       )}
@@ -163,8 +157,7 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
       {variant.clinvar && (
         <Section>
           <h2>ClinVar</h2>
-          {/* @ts-expect-error TS(2322) FIXME: Type '{ variant_id: string; chrom: string; flags: ... Remove this comment to see the full error message */}
-          <VariantClinvarInfo variant={variant} />
+          <VariantClinvarInfo clinvar={variant.clinvar} />
         </Section>
       )}
 

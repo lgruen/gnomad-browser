@@ -1,5 +1,6 @@
-import PropTypes from 'prop-types'
 import React from 'react'
+
+import { Variant, LofCuration } from '../types'
 
 import { ExternalLink } from '@gnomad/ui'
 
@@ -15,7 +16,7 @@ const PROJECT_PUBLICATIONS = {
 }
 
 type LoFCurationResultProps = {
-  result: LoFCurationResultPropType
+  result: LofCuration
 }
 
 const LoFCurationResult = ({ result }: LoFCurationResultProps) => {
@@ -40,39 +41,23 @@ const LoFCurationResult = ({ result }: LoFCurationResultProps) => {
   )
 }
 
-type LoFCurationResultPropType = {
-  gene_id: string
-  gene_symbol?: string
-  verdict: string
-  flags?: string[]
-  project: string
-}
-
-// @ts-expect-error TS(2322) FIXME: Type 'Requireable<InferProps<{ gene_id: Validator<... Remove this comment to see the full error message
-const LoFCurationResultPropType: PropTypes.Requireable<LoFCurationResultPropType> = PropTypes.shape(
-  {
-    gene_id: PropTypes.string.isRequired,
-    gene_symbol: PropTypes.string,
-    verdict: PropTypes.string.isRequired,
-    flags: PropTypes.arrayOf(PropTypes.string),
-    project: PropTypes.string.isRequired,
-  }
-)
-
 type VariantLoFCurationResultsProps = {
-  variant: {
-    lof_curations: LoFCurationResultPropType[]
-  }
+  variant: Variant
 }
 
 const VariantLoFCurationResults = ({ variant }: VariantLoFCurationResultsProps) => {
-  const numGenes = new Set(variant.lof_curations.map((c) => c.gene_id)).size
+  const { lof_curations: lofCurations } = variant
+  if (!lofCurations) {
+    return null
+  }
+
+  const numGenes = new Set(lofCurations.map((c) => c.gene_id)).size
 
   return (
     <div>
       This variant was manually curated in {numGenes} gene{numGenes !== 1 ? 's' : ''}.
       <ul>
-        {variant.lof_curations.map((result) => (
+        {lofCurations.map((result) => (
           <li key={result.gene_id}>
             <LoFCurationResult result={result} />
           </li>

@@ -10,8 +10,7 @@ import { forAllDatasets, forAllDatasetsExcept } from '../../../tests/__helpers__
 import { withDummyRouter } from '../../../tests/__helpers__/router'
 
 import ConstraintTable from './ConstraintTable'
-import { ExacConstraint } from './ExacConstraintTable'
-import { GnomadConstraint } from './GnomadConstraintTable'
+import { ExacConstraint, GnomadConstraint } from '../types'
 
 const exacConstraintFactory = Factory.define<ExacConstraint>(() => ({
   exp_lof: 0.123,

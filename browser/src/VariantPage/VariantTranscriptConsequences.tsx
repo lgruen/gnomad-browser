@@ -2,18 +2,20 @@ import React from 'react'
 
 import { Badge } from '@gnomad/ui'
 
+import { Variant } from '../types'
+
 import { TranscriptConsequenceList } from './TranscriptConsequenceList'
-import TranscriptConsequencePropType from './TranscriptConsequencePropType'
 
 type Props = {
-  variant: {
-    reference_genome: 'GRCh37' | 'GRCh38'
-    transcript_consequences: TranscriptConsequencePropType[]
-  }
+  variant: Variant
 }
 
 const VariantTranscriptConsequences = ({ variant }: Props) => {
   const { transcript_consequences: transcriptConsequences } = variant
+  if (!transcriptConsequences) {
+    return null
+  }
+
   const numTranscripts = transcriptConsequences.length
   const geneIds = Array.from(new Set(transcriptConsequences.map((csq) => csq.gene_id)))
   const numGenes = geneIds.length

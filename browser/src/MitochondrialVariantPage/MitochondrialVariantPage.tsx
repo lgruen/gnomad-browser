@@ -163,7 +163,7 @@ const MitochondrialVariantPage = ({ datasetId, variant }: MitochondrialVariantPa
         <ResponsiveSection>
           <h2>ClinVar</h2>
           {/* @ts-expect-error TS(2741) FIXME: Property 'clinvar' is missing in type 'Mitochondri... Remove this comment to see the full error message */}
-          <VariantClinvarInfo variant={variant} />
+          <VariantClinvarInfo clinvar={variant.clinvar} />
         </ResponsiveSection>
       )}
     </Wrapper>

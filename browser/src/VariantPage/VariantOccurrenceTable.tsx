@@ -4,6 +4,8 @@ import styled from 'styled-components'
 
 import { Badge, TooltipAnchor, TooltipHint } from '@gnomad/ui'
 
+import { SequencingType, Variant } from '../types'
+
 import { GNOMAD_POPULATION_NAMES } from '@gnomad/dataset-metadata/gnomadPopulations'
 import sampleCounts from '@gnomad/dataset-metadata/sampleCounts'
 
@@ -39,11 +41,11 @@ const NoWrap = styled.span`
   white-space: nowrap;
 `
 
-const renderGnomadVariantFlag = (variant: any, exomeOrGenome: any) => {
-  if (!variant[exomeOrGenome]) {
+const renderGnomadVariantFlag = (exomeOrGenome: SequencingType | null) => {
+  if (!exomeOrGenome) {
     return <Badge level="error">No variant</Badge>
   }
-  const { filters } = variant[exomeOrGenome]
+  const { filters } = exomeOrGenome
   if (filters.length === 0) {
     return <Badge level="success">Pass</Badge>
   }
@@ -140,47 +142,7 @@ type OwnGnomadVariantOccurrenceTableProps = {
   datasetId: DatasetId
   showExomes?: boolean
   showGenomes?: boolean
-  variant: {
-    chrom: string
-    coverage: {
-      exome?: {
-        mean?: number
-      }
-      genome?: {
-        mean?: number
-      }
-    }
-    exome?: {
-      ac: number
-      an: number
-      ac_hom: number
-      ac_hemi?: number
-      faf95: {
-        popmax?: number
-        popmax_population?: string
-      }
-      quality_metrics: {
-        allele_balance: {
-          alt?: histogramPropType
-        }
-      }
-    }
-    genome?: {
-      ac: number
-      an: number
-      ac_hom: number
-      ac_hemi?: number
-      faf95: {
-        popmax?: number
-        popmax_population?: string
-      }
-      quality_metrics: {
-        allele_balance: {
-          alt?: histogramPropType
-        }
-      }
-    }
-  }
+  variant: Variant
 }
 
 // @ts-expect-error TS(2456) FIXME: Type alias 'GnomadVariantOccurrenceTableProps' cir... Remove this comment to see the full error message
@@ -290,8 +252,8 @@ export const GnomadVariantOccurrenceTable = ({
                 <TooltipHint>Filters</TooltipHint>
               </TooltipAnchor>
             </th>
-            {showExomes && <td>{renderGnomadVariantFlag(variant, 'exome')}</td>}
-            {showGenomes && <td>{renderGnomadVariantFlag(variant, 'genome')}</td>}
+            {showExomes && <td>{renderGnomadVariantFlag(variant.exome)}</td>}
+            {showGenomes && <td>{renderGnomadVariantFlag(variant.genome)}</td>}
             {showTotal && <td />}
           </tr>
           <tr>

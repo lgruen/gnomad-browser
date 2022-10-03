@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Tabs } from '@gnomad/ui'
 
+import { Variant } from '../types'
+
 import TableWrapper from '../TableWrapper'
 import { GnomadPopulationsTable } from './GnomadPopulationsTable'
 import LocalAncestryPopulationsTable from './LocalAncestryPopulationsTable'
@@ -10,36 +12,24 @@ import TGPPopulationsTable from './TGPPopulationsTable'
 
 type Props = {
   datasetId: string
-  variant: {
-    chrom: string
-    exome?: {
-      populations: any[]
-      local_ancestry_populations?: any[]
-    }
-    genome?: {
-      populations: any[]
-      local_ancestry_populations?: any[]
-    }
-  }
+  variant: Variant
 }
 
 const VariantPopulationFrequencies = ({ datasetId, variant }: Props) => {
   if (datasetId.startsWith('gnomad_r3')) {
-    // @ts-expect-error TS(2532) FIXME: Object is possibly 'undefined'.
-    const gnomadPopulations = variant.genome.populations.filter(
+    const genome = variant.genome!
+
+    const gnomadPopulations = genome.populations.filter(
       (pop) => !(pop.id.startsWith('hgdp:') || pop.id.startsWith('1kg:'))
     )
-    // @ts-expect-error TS(2532) FIXME: Object is possibly 'undefined'.
-    const hgdpPopulations = variant.genome.populations
+    const hgdpPopulations = genome.populations
       .filter((pop) => pop.id.startsWith('hgdp:'))
       .map((pop) => ({ ...pop, id: pop.id.slice(5) })) // Remove hgdp: prefix
-    // @ts-expect-error TS(2532) FIXME: Object is possibly 'undefined'.
-    const tgpPopulations = variant.genome.populations
+    const tgpPopulations = genome.populations
       .filter((pop) => pop.id.startsWith('1kg:'))
       .map((pop) => ({ ...pop, id: pop.id.slice(4) })) // Remove 1kg: prefix
 
-    // @ts-expect-error TS(2532) FIXME: Object is possibly 'undefined'.
-    const localAncestryPopulations = variant.genome.local_ancestry_populations
+    const localAncestryPopulations = genome.local_ancestry_populations
 
     return (
       // @ts-expect-error TS(2741) FIXME: Property 'onChange' is missing in type '{ tabs: { ... Remove this comment to see the full error message
@@ -115,7 +105,6 @@ const VariantPopulationFrequencies = ({ datasetId, variant }: Props) => {
                 return <p>Local ancestry is not available for subsets of gnomAD v3.</p>
               }
 
-              // @ts-expect-error TS(2532) FIXME: Object is possibly 'undefined'.
               if (localAncestryPopulations.length === 0) {
                 return (
                   <p>
@@ -128,7 +117,6 @@ const VariantPopulationFrequencies = ({ datasetId, variant }: Props) => {
 
               return (
                 <TableWrapper>
-                  {/* @ts-expect-error TS(2322) FIXME: Type 'any[] | undefined' is not assignable to type... Remove this comment to see the full error message */}
                   <LocalAncestryPopulationsTable populations={localAncestryPopulations} />
                 </TableWrapper>
               )

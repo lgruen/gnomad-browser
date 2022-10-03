@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import { GnomadConstraint } from '../types'
+
 import { Badge, BaseTable, TooltipAnchor, TooltipHint } from '@gnomad/ui'
 
 import Link from '../Link'
@@ -79,7 +81,11 @@ Graph.defaultProps = {
   color: undefined,
 }
 
-const renderOEMetrics = (constraint: GnomadConstraint, category: ConstraintFieldWithOEMetrics, highlightColor: string | null) => {
+const renderOEMetrics = (
+  constraint: GnomadConstraint,
+  category: ConstraintFieldWithOEMetrics,
+  highlightColor: string | null
+) => {
   const value = constraint[`oe_${category}` as OEMetricField]
   const lower = constraint[`oe_${category}_lower` as OEMetricField]
   const upper = constraint[`oe_${category}_upper` as OEMetricField]
@@ -126,31 +132,11 @@ const CONSTRAINT_FLAG_DESCRIPTIONS = {
   syn_outlier: 'More or fewer synonymous variants than expected',
 }
 
-export type GnomadConstraint = {
-  exp_lof: number
-  exp_mis: number
-  exp_syn: number
-  obs_lof?: number
-  obs_mis?: number
-  obs_syn?: number
-  oe_lof: number
-  oe_lof_lower: number
-  oe_lof_upper: number
-  oe_mis: number
-  oe_mis_lower: number
-  oe_mis_upper: number
-  oe_syn: number
-  oe_syn_lower: number
-  oe_syn_upper: number
-  lof_z?: number
-  mis_z: number
-  syn_z: number
-  pLI: number
-  flags?: string[]
-}
-
 type ConstraintFieldWithOEMetrics = 'lof' | 'mis' | 'syn'
-type OEMetricField = `oe_${ConstraintFieldWithOEMetrics}` | `oe_${ConstraintFieldWithOEMetrics}_lower` | `oe_${ConstraintFieldWithOEMetrics}_upper`
+type OEMetricField =
+  | `oe_${ConstraintFieldWithOEMetrics}`
+  | `oe_${ConstraintFieldWithOEMetrics}_lower`
+  | `oe_${ConstraintFieldWithOEMetrics}_upper`
 
 type GnomadConstraintTableProps = {
   constraint: GnomadConstraint

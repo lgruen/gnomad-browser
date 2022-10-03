@@ -26,8 +26,8 @@ const VariantPageRouter = lazy(() => import('./VariantPageRouter'))
 
 const ShortTandemRepeatPage = lazy(() => import('./ShortTandemRepeatPage/ShortTandemRepeatPage'))
 const ShortTandemRepeatsPage = lazy(() => import('./ShortTandemRepeatsPage/ShortTandemRepeatsPage'))
-const VariantCooccurrencePage = lazy(() =>
-  import('./VariantCooccurrencePage/VariantCooccurrencePage')
+const VariantCooccurrencePage = lazy(
+  () => import('./VariantCooccurrencePage/VariantCooccurrencePage')
 )
 
 // Other pages

@@ -2,16 +2,21 @@ import React from 'react'
 
 import { Badge, ExternalLink } from '@gnomad/ui'
 
+import { GeneMetadata } from '../types'
+
 type Props = {
-  gene: {
-    flags: string[]
-  }
+  gene: GeneMetadata
 }
 
 const GeneFlags = ({ gene }: Props) => {
+  const { flags } = gene
+  if (!flags) {
+    return null
+  }
+
   return (
     <>
-      {gene.flags.includes('chip') && (
+      {flags.includes('chip') && (
         <p>
           <Badge level="warning">Note</Badge> Analysis of allele balance and age data indicates that
           this gene shows evidence of{' '}

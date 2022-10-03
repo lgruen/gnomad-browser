@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { Variant } from '../types'
 
 import { Badge, TooltipAnchor, TooltipHint } from '@gnomad/ui'
 
@@ -31,26 +32,21 @@ const Table = styled.table`
 `
 
 type Props = {
-  variant: {
-    chrom: string
-    coverage: {
-      exome?: {
-        mean?: number
-      }
-    }
-    exome: {
-      filters: string[]
-      ac: number
-      an: number
-      ac_hom: number
-      ac_hemi?: number
-    }
-  }
+  variant: Variant
 }
 
 const ExacVariantOccurrenceTable = ({ variant }: Props) => {
   // Display a warning if a variant's AN is < 50% of the max AN.
   // Max AN is 2 * sample count, so 50% max AN is equal to sample count.
+
+  // This shouldn't happen, it's not immediately clear though whether it's
+  // best to represent that as a constraint at the type level or to throw an
+  // error. TBD.
+
+  if (variant.exome === null) {
+    return null
+  }
+
   const hasLowAlleleNumber = variant.exome.an < sampleCounts.exac.total
 
   const coverage = (variant.coverage.exome || { mean: null }).mean
@@ -147,7 +143,6 @@ const ExacVariantOccurrenceTable = ({ variant }: Props) => {
                 <TooltipHint>Mean depth of coverage</TooltipHint>
               </TooltipAnchor>
             </th>
-            {/* @ts-expect-error TS(2532) FIXME: Object is possibly 'undefined'. */}
             <td>{coverage !== null ? coverage.toFixed(1) : '–'}</td>
           </tr>
         </tbody>

@@ -1,5 +1,14 @@
 // https://jestjs.io/docs/en/configuration.html
 
+/*const realConsole = global.console
+const filteredWarn: typeof realConsole.warn = (message?: any, ..._optionalParams: any[]) =>
+  realConsole.warn(`MESSAGE FOR YOU: ${message}`)
+const filteredConsole = {
+  ...realConsole,
+  warn: filteredWarn,
+}
+global.console = filteredConsole
+*/
 module.exports = {
   projects: [
     {
@@ -9,9 +18,10 @@ module.exports = {
           '<rootDir>/tests/__mocks__/fileMock.js',
         // workaround for yet another extremely cursed aspect of the JS stack
         '^lodash-es$': 'lodash',
+        '^react-sizeme$': '<rootDir>/tests/__mocks__/reactSizemeMock.ts',
       },
       testMatch: ['<rootDir>/browser/**/*.spec.(js|jsx|ts|tsx)'],
-      setupFilesAfterEnv: ['@testing-library/jest-dom'],
+      setupFilesAfterEnv: ['@testing-library/jest-dom', './filterWarn.ts'],
       testEnvironment: 'jsdom',
       preset: 'ts-jest',
     },

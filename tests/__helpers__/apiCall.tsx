@@ -21,3 +21,44 @@ export const apiCallsMatching = (
     return { body: { variables: parsedBody.variables } }
   })
 }
+
+export type MockEndpoint = { build: () => any }
+export type MockEndpoints = [RegExp, MockEndpoint][]
+type MockRouter = {
+  request: (query: string) => any
+  reroute: (newEndpoints: MockEndpoints) => void
+}
+
+const createMockRouter = (originalMockEndpoints: MockEndpoints): MockRouter => {
+  let endpoints = originalMockEndpoints
+
+  const request = (query: string) => {
+    const match = endpoints.find(([path, _value]) => query.match(path))
+    if (match === undefined) {
+      throw `stubbed BaseQuery got unexpected URL "${query}"`
+    }
+    return match[1].build()
+  }
+
+  const reroute = (newEndpoints: MockEndpoints) => {
+    endpoints = newEndpoints
+  }
+
+  return { request, reroute }
+}
+
+export const stubQueries = (originalMockEndpoints: MockEndpoints) => {
+  const router = createMockRouter(originalMockEndpoints)
+
+  jest.mock('../../browser/src/Query', () => ({
+    BaseQuery: ({ children, query }: any) => {
+      const response = router.request(query)
+      const mockGraphqlResponse = { data: response }
+      return children(mockGraphqlResponse)
+    },
+  }))
+
+  return router
+}
+
+export const staticResponse = (data: any) => ({ build: () => data })

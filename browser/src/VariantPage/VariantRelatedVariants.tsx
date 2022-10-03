@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import { Variant } from '../types'
+
 import Link from '../Link'
 import MNVSummaryList from '../MNVPage/MNVSummaryList'
 import VariantLiftover from './VariantLiftover'
@@ -39,6 +41,7 @@ const isVariantEligibleForCooccurrence = (variant: any, datasetId: any) => {
 
   return (
     exomeAC <= 0.05 &&
+    variant.transcript_consequences &&
     variant.transcript_consequences.some((csq: any) =>
       CODING_AND_UTR_VEP_CONSEQUENCES.has(csq.major_consequence)
     )
@@ -70,16 +73,7 @@ const getLocusWindow = ({ chrom, pos }: any, range = 20) => {
 
 type VariantRelatedVariantsProps = {
   datasetId: string
-  variant: {
-    variant_id: string
-    colocated_variants?: string[]
-    liftover?: any[]
-    liftover_sources?: any[]
-    multi_nucleotide_variants?: any[]
-    exome?: any
-    genome?: any
-    transcript_consequences?: any[]
-  }
+  variant: Variant
 }
 
 const VariantRelatedVariants = ({ datasetId, variant }: VariantRelatedVariantsProps) => {

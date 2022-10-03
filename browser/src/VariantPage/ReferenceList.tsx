@@ -1,20 +1,10 @@
 import React from 'react'
 
 import { ExternalLink, List, ListItem } from '@gnomad/ui'
+import { Variant } from '../types'
 
 type Props = {
-  variant: {
-    variant_id: string
-    reference_genome: 'GRCh37' | 'GRCh38'
-    chrom: string
-    pos: number
-    ref: string
-    caid?: string
-    rsids?: string[]
-    clinvar?: {
-      clinvar_variation_id: string
-    }
-  }
+  variant: Variant
 }
 
 export const ReferenceList = ({ variant }: Props) => {

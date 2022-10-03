@@ -12,8 +12,8 @@ import useRequest from './useRequest'
 import StatusMessage from './StatusMessage'
 import { fetchVariantSearchResults } from './search'
 
-const MitochondrialVariantPage = lazy(() =>
-  import('./MitochondrialVariantPage/MitochondrialVariantPage')
+const MitochondrialVariantPage = lazy(
+  () => import('./MitochondrialVariantPage/MitochondrialVariantPage')
 )
 const MNVPage = lazy(() => import('./MNVPage/MNVPage'))
 const StructuralVariantPage = lazy(() => import('./StructuralVariantPage/StructuralVariantPage'))

@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import InlineList from '../InlineList'
 import { getCategoryFromConsequence } from '../vepConsequences'
 import { LofteeFilter, LofteeFlag } from './Loftee'
-import TranscriptConsequencePropType from './TranscriptConsequencePropType'
+import { TranscriptConsequence } from '../types'
 
 const AttributeName = styled.dt`
   display: inline;
@@ -114,13 +114,12 @@ const renderDomain = (domain: any) => {
 }
 
 type TranscriptConsequenceProteinDomainsProps = {
-  consequence: TranscriptConsequencePropType
+  consequence: TranscriptConsequence
 }
 
 const TranscriptConsequenceProteinDomains = ({
   consequence,
 }: TranscriptConsequenceProteinDomainsProps) => {
-  // @ts-expect-error TS(2532) FIXME: Object is possibly 'undefined'.
   const domains = consequence.domains
     .map((domain) => {
       const [database, name] = domain.split(':')
@@ -147,7 +146,7 @@ const TranscriptConsequenceProteinDomains = ({
 }
 
 type TranscriptConsequenceProps = {
-  consequence: TranscriptConsequencePropType
+  consequence: TranscriptConsequence
 }
 
 const TranscriptConsequence = ({ consequence }: TranscriptConsequenceProps) => {

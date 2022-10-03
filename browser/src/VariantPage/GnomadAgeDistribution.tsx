@@ -8,6 +8,8 @@ import { Checkbox, Select } from '@gnomad/ui'
 import gnomadV2AgeDistribution from '@gnomad/dataset-metadata/datasets/gnomad-v2/ageDistribution.json'
 import gnomadV3AgeDistribution from '@gnomad/dataset-metadata/datasets/gnomad-v3/ageDistribution.json'
 
+import { Variant } from '../types'
+
 import Legend, { StripedSwatch } from '../Legend'
 import StackedHistogram from '../StackedHistogram'
 import ControlSection from './ControlSection'
@@ -118,15 +120,7 @@ const getDefaultSelectedSequencingType = (variant: any) => {
 
 type GnomadAgeDistributionProps = {
   datasetId: string
-  variant: {
-    chrom: string
-    exome?: {
-      age_distribution: AgeDistributionPropType
-    }
-    genome?: {
-      age_distribution: AgeDistributionPropType
-    }
-  }
+  variant: Variant
 }
 
 const GnomadAgeDistribution = ({ datasetId, variant }: GnomadAgeDistributionProps) => {

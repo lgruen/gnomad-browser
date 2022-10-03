@@ -5,6 +5,8 @@ import styled from 'styled-components'
 
 import { Checkbox, Select, Tabs } from '@gnomad/ui'
 
+import { Variant } from '../types'
+
 import Legend, { StripedSwatch } from '../Legend'
 import StackedHistogram from '../StackedHistogram'
 import ControlSection from './ControlSection'
@@ -61,14 +63,7 @@ const getDefaultSelectedSequencingType = (variant: any) => {
 
 type VariantGenotypeQualityMetricsProps = {
   datasetId: string
-  variant: {
-    exome?: {
-      quality_metrics: GenotypeQualityMetricPropType
-    }
-    genome?: {
-      quality_metrics: GenotypeQualityMetricPropType
-    }
-  }
+  variant: Variant
 }
 
 const VariantGenotypeQualityMetrics = ({
