@@ -1,0 +1,11 @@
+type ExacRegionalMissenseConstraintRegion {
+	chrom: String!
+  start: Int!
+  stop: Int!
+	possible: Int
+	exp: Float
+  obs: Int
+  obs_exp: Float
+	z_score: Float!
+	coding_prop: Float
+}

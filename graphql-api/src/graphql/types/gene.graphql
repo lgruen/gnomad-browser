@@ -18,6 +18,36 @@ type ManeSelectTranscript {
   refseq_version: String!
 }
 
+type NonCodingConstraintTissue {
+  tissue: String!
+  enhancer: String!
+  enhancer_constraint_z: Float!
+  element_id: String!
+  start: Int!
+  stop: Int!
+  possible: Float!
+  observed: Float!
+  expected: Float!
+  oe: Float!
+}
+
+type NonCodingConstraint {
+  gene_id: String!
+  symbol: String!
+  tissue: String!
+  enhancer: String!
+  enhancer_constraint_z: Float!
+  element_id: String!
+  chrom: String!
+  start: Int!
+  stop: Int!
+  possible: Float!
+  expected: Float!
+  observed: Float!
+  oe: Float!
+  tissues: [NonCodingConstraintTissue]
+}
+
 type Gene {
   reference_genome: ReferenceGenomeId!
   gene_id: String!
@@ -44,6 +74,8 @@ type Gene {
   gnomad_constraint: GnomadConstraint
   exac_constraint: ExacConstraint
   exac_regional_missense_constraint_regions: [ExacRegionalMissenseConstraintRegion!]
+
+  non_coding_constraint: NonCodingConstraint
 
   variants(dataset: DatasetId!): [Variant!]! @cost(value: 10)
   structural_variants(dataset: StructuralVariantDatasetId!): [StructuralVariant!]! @cost(value: 10)

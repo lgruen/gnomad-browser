@@ -136,6 +136,16 @@ const fetchGenesMatchingText = async (esClient, query, referenceGenome) => {
     }))
 }
 
+const fetchGeneNCCById = async (esClient, geneId, referenceGenome) => {
+  if (referenceGenome !== 'GRCh38') return null
+  const response = await esClient.get({
+    index: 'ncc_gene_level_v3',
+    type: '_doc',
+    id: geneId,
+  })
+  return response.body._source
+}
+
 module.exports = {
   fetchGeneById: withCache(
     fetchGeneById,
@@ -145,4 +155,5 @@ module.exports = {
   fetchGeneBySymbol,
   fetchGenesByRegion,
   fetchGenesMatchingText,
+  fetchGeneNCCById,
 }

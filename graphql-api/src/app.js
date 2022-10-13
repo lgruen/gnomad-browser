@@ -62,7 +62,6 @@ app.use(function requestLogMiddleware(request, response, next) {
               ).toFixed(3)}s`
             : undefined,
         protocol: `HTTP/${request.httpVersionMajor}.${request.httpVersionMinor}`,
-        testing: `what_the_heck: ${JSON.stringify(response.data)}`,
       },
     })
   })
