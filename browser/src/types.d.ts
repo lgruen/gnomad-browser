@@ -38,6 +38,7 @@ export type Gene = GeneMetadata & {
   flags: string[]
   gnomad_constraint?: GnomadConstraint
   exac_constraint?: ExacConstraint
+  non_coding_constraint?: NonCodingConstraint
   pext?: {
     regions: {
       start: number
@@ -70,6 +71,8 @@ export type Transcript = {
   }[]
   gnomad_constraint?: GnomadConstraint
   exac_constraint?: ExacConstraint
+  // TODO:(rgrant) this doesn't seem right
+  non_coding_constraint?: NonCodingConstraint
   gene: GeneMetadata
 }
 

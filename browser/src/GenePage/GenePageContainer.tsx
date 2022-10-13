@@ -73,6 +73,29 @@ query ${operationName}($geneId: String, $geneSymbol: String, $referenceGenome: R
       lof_z
       pLI
     }
+    non_coding_constraint {
+      element_id
+      enhancer
+      enhancer_constraint_z
+      start
+      stop
+      possible
+      expected
+      observed
+      oe
+      tissues {
+        tissue
+        element_id
+        enhancer
+        enhancer_constraint_z
+        start
+        stop
+        possible
+        observed
+        expected
+        oe
+      }
+    }
     transcripts {
       transcript_id
       transcript_version

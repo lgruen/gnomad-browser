@@ -6,8 +6,14 @@ import Link from '../Link'
 
 import ExacConstraintTable from './ExacConstraintTable'
 import GnomadConstraintTable from './GnomadConstraintTable'
+import GnomadNonCodingConstraintTable from './GnomadNonCodingConstraintTable'
 
-import { DatasetId, hasConstraints } from '@gnomad/dataset-metadata/metadata'
+import {
+  datasetLabels,
+  DatasetId,
+  hasConstraints,
+  hasNonCodingConstraints,
+} from '@gnomad/dataset-metadata/metadata'
 
 type Props = {
   datasetId: DatasetId
@@ -58,8 +64,32 @@ const transcriptDetails = (
 }
 
 const ConstraintTable = ({ datasetId, geneOrTranscript }: Props) => {
-  if (!hasConstraints(datasetId)) {
-    return <p>Constraint not yet available for gnomAD v3.</p>
+  if (!hasConstraints(datasetId) && !hasNonCodingConstraints(datasetId)) {
+    return <p>Constraint not yet available for {datasetLabels[datasetId]}.</p>
+  }
+
+  // TODO:(rgrant) move me a bit?
+  // const nonCodingConstraint = geneOrTranscript.non_coding_constraint
+
+  if (hasNonCodingConstraints(datasetId)) {
+    return (
+      <>
+        {/* <p>Non-Coding Constraint</p> */}
+        <GnomadNonCodingConstraintTable
+          geneId={(geneOrTranscript as Gene).gene_id}
+          constraint={geneOrTranscript.non_coding_constraint}
+        />
+        {/* <p>
+          This is{' '}
+          <b>
+            <i>not</i>
+          </b>{' '}
+          a Gene level constraint, for the constraints on the corresponding Gene of build GRCh37,
+          visit{' '}
+          <Link to={`/`}>Test</Link>
+        </p> */}
+      </>
+    )
   }
 
   const { transcriptId, transcriptVersion, transcriptDescription } = transcriptDetails(

@@ -9,6 +9,7 @@ import DocumentTitle from '../DocumentTitle'
 import GnomadPageHeading from '../GnomadPageHeading'
 import InfoButton from '../help/InfoButton'
 import { BaseQuery } from '../Query'
+import Link from '../Link'
 import ReadData from '../ReadData/ReadData'
 import StatusMessage from '../StatusMessage'
 import TableWrapper from '../TableWrapper'
@@ -21,6 +22,7 @@ import VariantGenotypeQualityMetrics from './VariantGenotypeQualityMetrics'
 import VariantNotFound from './VariantNotFound'
 import { GnomadVariantOccurrenceTable } from './VariantOccurrenceTable'
 import VariantInSilicoPredictors from './VariantInSilicoPredictors'
+import GnomadNonCodingConstraintTableVariant from './GnomadNonCodingConstraintTableVariant'
 import VariantLoFCurationResults from './VariantLoFCurationResults'
 import VariantPageTitle from './VariantPageTitle'
 import VariantPopulationFrequencies from './VariantPopulationFrequencies'
@@ -58,6 +60,7 @@ type VariantPageContentProps = {
     genome?: any
     lof_curations?: any[]
     in_silico_predictors?: any[]
+    non_coding_constraint?: any
     transcript_consequences?: any[]
   }
 }
@@ -152,13 +155,26 @@ const VariantPageContent = ({ datasetId, variant }: VariantPageContentProps) => 
         </Section>
       )}
 
-      {variant.in_silico_predictors && variant.in_silico_predictors.length && (
-        <Section>
-          <h2>In Silico Predictors</h2>
-          {/* @ts-expect-error TS(2322) FIXME: Type '{ variant_id: string; chrom: string; flags: ... Remove this comment to see the full error message */}
-          <VariantInSilicoPredictors variant={variant} />
-        </Section>
-      )}
+      <FlexWrapper>
+        {variant.in_silico_predictors && variant.in_silico_predictors.length && (
+          <ResponsiveSection>
+            <h2>In Silico Predictors</h2>
+            {/* @ts-expect-error TS(2322) FIXME: Type '{ variant_id: string; chrom: string; flags: ... Remove this comment to see the full error message */}
+            <VariantInSilicoPredictors variant={variant} />
+          </ResponsiveSection>
+        )}
+        <ResponsiveSection>
+          <h2>Genomic Constraint of Surrounding 1kb Region</h2>
+          <p>
+            Read more about this <Link to={'/'}>here</Link>
+          </p>
+          <GnomadNonCodingConstraintTableVariant
+            variantId={variant.variant_id}
+            chrom={variant.chrom}
+            nonCodingConstraint={variant.non_coding_constraint}
+          />
+        </ResponsiveSection>
+      </FlexWrapper>
 
       {variant.clinvar && (
         <Section>
@@ -418,6 +434,15 @@ query GnomadVariant($variantId: String!, $datasetId: DatasetId!, $referenceGenom
       id
       value
       flags
+    }
+    non_coding_constraint {
+      start
+      stop
+      possible
+      observed
+      expected
+      oe
+      z
     }
   }
 

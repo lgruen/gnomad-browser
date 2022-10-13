@@ -38,7 +38,7 @@ const cancelable = (promise: any) => {
 }
 
 type OwnBaseQueryProps = {
-  operationName: string
+  operationName: string | null
   query: string
   url?: string
   variables?: any
@@ -51,7 +51,7 @@ type BaseQueryProps = OwnBaseQueryProps & typeof BaseQuery.defaultProps
 export class BaseQuery extends Component<BaseQueryProps, BaseQueryState> {
   static defaultProps = {
     url: 'http://localhost:8010/api',
-    operationName: '',
+    operationName: null,
     variables: {},
   }
 
@@ -206,9 +206,9 @@ Query.defaultProps = {
   loadingMessage: 'Loading',
   loadingPlaceholderHeight: undefined,
   success: () => true,
-  url: '/api/',
+  url: 'http://localhost:8010/api',
   variables: {},
-  operatioName: '',
+  operationName: null,
 }
 
 export default Query
