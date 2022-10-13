@@ -40,15 +40,22 @@ const RegionAttributeList = styled.dl`
 
 function regionColor(region: any) {
   // http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=3
+  // https://colorbrewer2.org/#type=sequential&scheme=PuBu&n=4
   let color
-  if (region.obs_exp > 0.6) {
-    color = '#e2e2e2'
-  } else if (region.obs_exp > 0.4) {
-    color = '#ffeda0'
-  } else if (region.obs_exp > 0.2) {
-    color = '#feb24c'
-  } else {
+  if (region.z > 2.5) {
     color = '#f03b20'
+  } else if (region.z > 1.2) {
+    color = '#feb24c'
+  } else if (region.z > 0.6) {
+    color = '#ffeda0'
+  } else if (region.z > -0.6) {
+    color = '#e2e2e2'
+  } else if (region.z > -1.2) {
+    color = '#bdc9e1'
+  } else if (region.z > -2.5) {
+    color = '#74a9cf'
+  } else {
+    color = '#0570b0'
   }
 
   return region.chisq_diff_null < 10.8 ? transparentize(0.8, color) : color
@@ -60,18 +67,22 @@ const renderNumber = (number: any) =>
 type RegionTooltipProps = {
   label: string
   region: {
-    obs_exp?: number
-    chisq_diff_null?: number
+    z: number
+    obs_exp: number
   }
 }
 
 const RegionTooltip = ({ label, region }: RegionTooltipProps) => (
   <RegionAttributeList>
     <div>
+      <dt>Z {label}:</dt>
+      <dd>{renderNumber(region.z)}</dd>
+    </div>
+    <div>
       <dt>O/E {label}:</dt>
       <dd>{renderNumber(region.obs_exp)}</dd>
     </div>
-    {region.chisq_diff_null && (
+    {/* {region.chisq_diff_null && (
       <div>
         <dt>
           &chi;
@@ -82,7 +93,7 @@ const RegionTooltip = ({ label, region }: RegionTooltipProps) => (
           {region.chisq_diff_null !== null && region.chisq_diff_null < 10.8 && ' (not significant)'}
         </dd>
       </div>
-    )}
+    )} */}
   </RegionAttributeList>
 )
 
@@ -97,17 +108,21 @@ type OwnRegionalConstraintTrackProps = {
   regions: {
     start: number
     stop: number
-    obs_exp: number
-    chisq_diff_null: number
+    z: number
+    // chisq_diff_null: number
   }[]
 }
 
 // @ts-expect-error TS(2456) FIXME: Type alias 'RegionalConstraintTrackProps' circular... Remove this comment to see the full error message
 type RegionalConstraintTrackProps = OwnRegionalConstraintTrackProps &
-  typeof RegionalConstraintTrack.defaultProps
+  typeof RegionalGenomicConstraintTrack.defaultProps
 
 // @ts-expect-error TS(7022) FIXME: 'RegionalConstraintTrack' implicitly has type 'any... Remove this comment to see the full error message
-const RegionalConstraintTrack = ({ label, height, regions }: RegionalConstraintTrackProps) => (
+const RegionalGenomicConstraintTrack = ({
+  label,
+  height,
+  regions,
+}: RegionalConstraintTrackProps) => (
   <Wrapper>
     <Track
       renderLeftPanel={() => (
@@ -144,7 +159,7 @@ const RegionalConstraintTrack = ({ label, height, regions }: RegionalConstraintT
                     />
                     {regionWidth > 30 && (
                       <text x={(startX + stopX) / 2} y={height / 2} dy="0.33em" textAnchor="middle">
-                        {region.obs_exp.toFixed(2)}
+                        {region.z.toFixed(2)}
                       </text>
                     )}
                   </g>
@@ -158,8 +173,8 @@ const RegionalConstraintTrack = ({ label, height, regions }: RegionalConstraintT
   </Wrapper>
 )
 
-RegionalConstraintTrack.defaultProps = {
+RegionalGenomicConstraintTrack.defaultProps = {
   height: 15,
 }
 
-export default RegionalConstraintTrack
+export default RegionalGenomicConstraintTrack

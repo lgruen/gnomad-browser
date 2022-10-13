@@ -7,6 +7,8 @@ import { DatasetId, labelForDataset } from '@gnomad/dataset-metadata/metadata'
 import DocumentTitle from '../DocumentTitle'
 import GnomadPageHeading from '../GnomadPageHeading'
 import Link from '../Link'
+// import RegionalConstraintTrack from '../RegionalConstraintTrack'
+import RegionalGenomicConstraintTrack from '../RegionalGenomicConstraintTrack'
 import RegionViewer from '../RegionViewer/RegionViewer'
 import { TrackPage, TrackPageSection } from '../TrackPage'
 import { useWindowSize } from '../windowSize'
@@ -20,6 +22,8 @@ import RegionCoverageTrack from './RegionCoverageTrack'
 import RegionInfo from './RegionInfo'
 import VariantsInRegion from './VariantsInRegion'
 import StructuralVariantsInRegion from './StructuralVariantsInRegion'
+
+import { hasNonCodingConstraints } from '@gnomad/dataset-metadata/metadata'
 
 const RegionInfoColumnWrapper = styled.div`
   display: flex;
@@ -55,6 +59,14 @@ type Props = {
     short_tandem_repeats?: {
       id: string
     }[]
+    non_coding_constraints:
+      | {
+          start: number
+          stop: number
+          oe: number
+          z: number
+        }[]
+      | null
   }
 }
 
@@ -133,6 +145,42 @@ const RegionPage = ({ datasetId, region }: Props) => {
         )}
 
         <GenesInRegionTrack genes={region.genes} region={region} />
+
+        {/* FIXME:(rgrant) REMOVE ME LATER THIS IS MY WORKING SECTION --- START */}
+        {stop - start <= 200000 &&
+          region.non_coding_constraints !== null &&
+          hasNonCodingConstraints(datasetId) && (
+            <>
+              {/* <RegionalConstraintTrack
+                label={'non-coding'}
+                height={15}
+                regions={region.non_coding_constraints.map((ncc) => {
+                  return {
+                    start: ncc.start,
+                    stop: ncc.stop,
+                    // obs_exp: ncc.oe,
+                    obs_exp: ncc.z
+                  }
+                })}
+              />
+
+              */}
+
+              <RegionalGenomicConstraintTrack
+                label={'genomic'}
+                height={15}
+                regions={region.non_coding_constraints.map((ncc) => {
+                  return {
+                    start: ncc.start,
+                    stop: ncc.stop,
+                    z: ncc.z,
+                    obs_exp: ncc.oe,
+                  }
+                })}
+              />
+            </>
+          )}
+        {/* FIXME:(rgrant) REMOVE ME LATER THIS IS MY WORKING SECTION --- END*/}
 
         {/* eslint-disable-next-line no-nested-ternary */}
         {datasetId.startsWith('gnomad_sv') ? (
