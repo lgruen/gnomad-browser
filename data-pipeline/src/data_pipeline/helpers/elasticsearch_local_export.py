@@ -1,0 +1,188 @@
+import datetime
+import json
+import re
+from functools import reduce
+
+# TODO:(rgrant) this is a file that's basically a copy of elasticsearch_export.py
+# but instead uses hardcoded values to export to a locally running elasticsearch
+# singlenode deployment run from a local docker container
+
+
+import elasticsearch
+import hail as hl
+
+HAIL_TYPE_TO_ES_TYPE_MAPPING = {
+    hl.tint: "integer",
+    hl.tint32: "integer",
+    hl.tint64: "long",
+    hl.tfloat: "double",
+    hl.tfloat32: "float",
+    hl.tfloat64: "double",
+    hl.tstr: "keyword",
+    hl.tbool: "boolean",
+}
+
+
+def _elasticsearch_mapping_for_hail_type(dtype):
+    if isinstance(dtype, hl.tstruct):
+        return {"properties": {field: _elasticsearch_mapping_for_hail_type(dtype[field]) for field in dtype.fields}}
+
+    if isinstance(dtype, (hl.tarray, hl.tset)):
+        element_mapping = _elasticsearch_mapping_for_hail_type(dtype.element_type)
+
+        if isinstance(dtype.element_type, hl.tstruct):
+            element_mapping["type"] = "nested"
+
+        return element_mapping
+
+    if isinstance(dtype, hl.tlocus):
+        return {"type": "object", "properties": {"contig": {"type": "keyword"}, "position": {"type": "integer"}}}
+
+    if isinstance(dtype, hl.tinterval):
+        return {
+            "type": "object",
+            "properties": {
+                "start": _elasticsearch_mapping_for_hail_type(dtype.point_type),
+                "end": _elasticsearch_mapping_for_hail_type(dtype.point_type),
+                "includes_start": {"type": "boolean"},
+                "includes_end": {"type": "boolean"},
+            },
+        }
+
+    if dtype in HAIL_TYPE_TO_ES_TYPE_MAPPING:
+        return {"type": HAIL_TYPE_TO_ES_TYPE_MAPPING[dtype]}
+
+    # tdict, ttuple, tinterval, tcall
+    raise NotImplementedError
+
+
+def _set_field_parameter(mapping, field, parameter, value):
+    keys = field.split(".")
+    ref = mapping
+    for key in keys:
+        ref = ref["properties"][key]
+
+    ref[parameter] = value
+
+
+def elasticsearch_mapping_for_table(table, disable_fields=None, override_types=None):
+    """
+    Creates an Elasticsearch mapping definition for a Hail table's row value type.
+
+    https://www.elastic.co/guide/en/elasticsearch/guide/current/root-object.html
+    """
+
+    mapping = _elasticsearch_mapping_for_hail_type(table.key_by().row_value.dtype)
+
+    if disable_fields:
+        for field in disable_fields:
+            _set_field_parameter(mapping, field, "enabled", False)
+
+    if override_types:
+        for field, field_type in override_types.items():
+            _set_field_parameter(mapping, field, "type", field_type)
+
+    return mapping
+
+
+def get_index_fields(table, index_fields):
+    def _get_index_field(field):
+        field_expr = reduce(getattr, field.split("."), table)
+        if isinstance(field_expr, hl.CollectionExpression):
+            field_expr = hl.set(field_expr)
+
+        return field_expr
+
+    return {field.split(".")[-1]: _get_index_field(field) for field in index_fields}
+
+
+def export_table_to_elasticsearch(
+    table,
+    # host,
+    index,
+    *,
+    auth=None,
+    block_size=5000,
+    id_field=None,
+    index_fields=None,
+    num_shards=1,
+):
+    """
+    yeh
+    """
+    export_time = datetime.datetime.utcnow()
+
+    table = table.select_globals(exported_at=export_time.isoformat(timespec="seconds"), table_globals=table.globals)
+    table = table.key_by()
+
+    if index_fields:
+        if id_field and id_field not in [f.split(".")[-1] for f in index_fields]:
+            raise RuntimeError("id_field must be included in index_fields")
+
+        table = table.select(**get_index_fields(table, index_fields), value=table.row)
+        mapping = elasticsearch_mapping_for_table(table, disable_fields=("value",))
+
+    else:
+        mapping = elasticsearch_mapping_for_table(table)
+
+    mapping["_meta"] = json.loads(hl.eval(hl.json(table.globals)))
+
+    # he hard coded a type name for indices for some reason
+    # this is the only (table) that's in this given index(database)
+    type_name = "_doc"
+
+    request_body = {
+        # TODO:(rgrant) this is the one line that fixed it
+        "mappings": mapping,
+        # "mappings": {type_name: mapping},
+        "settings": {
+            "index.codec": "best_compression",
+            "index.mapping.total_fields.limit": 10000,
+            "index.number_of_replicas": 0,
+            "index.number_of_shards": num_shards,
+            "index.refresh_interval": -1,
+        },
+    }
+
+    es_client = elasticsearch.Elasticsearch(host="localhost", port=9203, http_auth=auth)
+    cluster_name = es_client.cluster.health()["cluster_name"]
+
+    index = f"{index}-{export_time.strftime('%Y-%m-%d--%H-%M')}"
+
+    # if you made one in the exact same minute?
+    if es_client.indices.exists(index=index):
+        es_client.indices.delete(index=index)
+
+    es_client.indices.create(index=index, body=request_body)
+
+    # set shard allocation based on available nodes
+    nodes = es_client.cat.nodes(format="json", h="name")
+    node_names = [node["name"] for node in nodes]
+    node_sets = set(re.sub(r"-[0-9]+$", "", node_name[len(f"{cluster_name}-es-") :]) for node_name in node_names)
+
+    if "ingest" in node_sets:
+        es_client.indices.put_settings(
+            index=index, body={"index.routing.allocation.require._name": f"{cluster_name}-es-ingest-*"}
+        )
+    else:
+        data_node_sets = [node_set for node_set in node_sets if node_set.startswith("data-")]
+        if len(data_node_sets) == 1:
+            es_client.indices.put_settings(
+                index=index,
+                body={"index.routing.allocation.require._name": f"{cluster_name}-es-{data_node_sets[0]}-*"},
+            )
+
+    elasticsearch_config = {"es.write.operation": "index", "es.nodes.wan.only": "true"}
+
+    if auth:
+        # elasticsearch_config["es.net.http.auth.user"] = auth[0]
+        # elasticsearch_config["es.net.http.auth.pass"] = auth[1]
+        elasticsearch_config["es.net.http.auth.user"] = "elastic"
+        elasticsearch_config["es.net.http.auth.pass"] = "DnBlP9R9bTYdVWQ5-sTq"
+
+    if id_field is not None:
+        elasticsearch_config["es.mapping.id"] = id_field
+
+    hl.export_elasticsearch(table, "localhost", 9203, index, type_name, block_size, elasticsearch_config, True)
+
+    es_client.indices.forcemerge(index=index)

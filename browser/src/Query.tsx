@@ -50,7 +50,7 @@ type BaseQueryProps = OwnBaseQueryProps & typeof BaseQuery.defaultProps
 
 export class BaseQuery extends Component<BaseQueryProps, BaseQueryState> {
   static defaultProps = {
-    url: '/api/',
+    url: 'http://localhost:8010/api',
     operationName: '',
     variables: {},
   }

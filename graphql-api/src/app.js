@@ -6,6 +6,7 @@ const onHeaders = require('on-headers')
 
 const config = require('./config')
 const esClient = require('./elasticsearch').client
+const esClientLocal = require('./elasticsearchLocal').client
 const graphQLApi = require('./graphql/graphql-api')
 const logger = require('./logger')
 
@@ -61,6 +62,7 @@ app.use(function requestLogMiddleware(request, response, next) {
               ).toFixed(3)}s`
             : undefined,
         protocol: `HTTP/${request.httpVersionMajor}.${request.httpVersionMinor}`,
+        testing: `what_the_heck: ${JSON.stringify(response.data)}`,
       },
     })
   })
@@ -68,7 +70,7 @@ app.use(function requestLogMiddleware(request, response, next) {
   next()
 })
 
-const context = { esClient }
+const context = { esClient, esClientLocal }
 
 app.use('/api/', graphQLApi({ context }))
 
