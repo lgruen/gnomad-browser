@@ -1,27 +1,20 @@
-const logger = require('../logger')
-
-const fetchNonCodingConstraintRegionbyId = async (esClient, nccId) => {
-  logger.info(nccId)
-  logger.info('testing!')
+const fetchGenomicConstraintRegionById = async (esClient, nccId) => {
   try {
     const response = await esClient.get({
-      index: 'ncc_region_level_v1',
+      index: 'gnomad_v3_genomic_constraint_regions',
       type: '_doc',
       id: nccId,
     })
-
-    logger.info(response)
     return response.body._source
   } catch (err) {
     return null
   }
 }
 
-const fetchNonCodingConstraintsByRegion = async (esClient, region) => {
+const fetchGenomicConstraintsByRegion = async (esClient, region) => {
   const { reference_genome: referenceGenome, chrom, start, stop } = region
 
-  // This data is only relevant on closer levels of zoom, at 100,000 there will be 100 segments
-  // if (stop - start > 100000) return null
+  // This data is only relevant on closer levels of zoom, at 200,000 there will be 200 segments
   if (stop - start > 200000) return null
 
   let curr = Math.floor(start / 1000) * 1000
@@ -34,7 +27,7 @@ const fetchNonCodingConstraintsByRegion = async (esClient, region) => {
 
   try {
     const response = await esClient.mget({
-      index: 'ncc_region_level_v1',
+      index: 'gnomad_v3_genomic_constraint_regions',
       body: {
         ids: allIds,
       },
@@ -47,6 +40,6 @@ const fetchNonCodingConstraintsByRegion = async (esClient, region) => {
 }
 
 module.exports = {
-  fetchNonCodingConstraintRegionbyId,
-  fetchNonCodingConstraintsByRegion,
+  fetchGenomicConstraintRegionById,
+  fetchGenomicConstraintsByRegion,
 }

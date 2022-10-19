@@ -1,12 +1,12 @@
 const { fetchGenesByRegion } = require('../../queries/gene-queries')
-const { fetchNonCodingConstraintsByRegion } = require('../../queries/non-coding-constraint-queries')
+const { fetchGenomicConstraintsByRegion } = require('../../queries/genomic-constraint-queries')
 
 const resolveGenesInRegion = (obj, args, ctx) => {
   return fetchGenesByRegion(ctx.esClient, obj)
 }
 
 const resolveNCCsInRegion = (obj, args, ctx) => {
-  return fetchNonCodingConstraintsByRegion(ctx.esClientLocal, obj)
+  return fetchGenomicConstraintsByRegion(ctx.esClient, obj)
 }
 
 module.exports = {

@@ -11,9 +11,7 @@ const {
   fetchVariantsByTranscript,
   fetchMatchingVariants,
 } = require('../../queries/variant-queries')
-const {
-  fetchNonCodingConstraintRegionbyId,
-} = require('../../queries/non-coding-constraint-queries')
+const { fetchGenomicConstraintRegionById } = require('../../queries/genomic-constraint-queries')
 
 const resolveVariant = async (obj, args, ctx) => {
   if (!(args.rsid || args.variantId)) {
@@ -46,7 +44,7 @@ const resolveVariant = async (obj, args, ctx) => {
   const variant = await fetchVariantById(ctx.esClient, dataset, variantId)
   const posRounded = Math.floor(variant.pos / 1000) * 1000
   const variantNCCId = `chr${variant.chrom}-${posRounded}-${posRounded + 1000}`
-  const variantNCC = await fetchNonCodingConstraintRegionbyId(ctx.esClientLocal, variantNCCId)
+  const variantNCC = await fetchGenomicConstraintRegionById(ctx.esClient, variantNCCId)
   variant.non_coding_constraint = variantNCC
   return variant
 }
