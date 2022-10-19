@@ -5,6 +5,8 @@ from datasets.gnomad_v3.gnomad_v3_region_non_coding_constraint import prepare_gn
 
 from helpers.elasticsearch_local_export import export_table_to_elasticsearch
 
+from helpers.elasticsearch_export import export_table_to_elasticsearch
+
 
 # TODO:(rgrant) this was used to load my data into a local elasticsearch instance
 #   this may or may not make it into prod
@@ -26,15 +28,33 @@ from helpers.elasticsearch_local_export import export_table_to_elasticsearch
 # TODO:(rgrant) uncmoment me to run the regions task
 print(f"RUNNING REGIONS")
 print(f"starting loading of table:")
-print(f"importig table")
+print(f"importing table")
 region_path = "/Users/rgrant/Downloads/oct14_ncc-files/constraint_z_genome_1kb_filtered.browser.txt"
 my_ds = prepare_gnomad_v3_region_non_coding_constraint(region_path)
 
 
+my_ds = my_ds
+my_host = "localhost"
+my_index = "gnomad_v3_genomic_constraint_regions"
+my_auth = ["elastic", "oF754d0FK6N4yH2tsR35L4Go"]
+
+my_id_field = "element_id"
+
 # part 2 - export it to my local one
 print(f"exporting table to elasticsearch")
 # export_table_to_elasticsearch(table=my_ds, index="ncc_gene_level_v3", id_field="gene_id")
-export_table_to_elasticsearch(table=my_ds, index="ncc_region_level_v1", id_field="element_id")
+# export_table_to_elasticsearch(table=my_ds, index="gnomad_v3_genomic_constraint_regions", id_field="element_id")
+# gnomad_v3_mitochondrial_variants
+#  index="gnomad_v3_genomic_constraint_enhancers"
 
+
+# TODO: HERE is where we try and do it to the real database
+export_table_to_elasticsearch(
+    table=my_ds,
+    host=my_host,
+    index=my_index,
+    auth=my_auth,
+    id_field=my_id_field,
+)
 
 print(f"finished")
